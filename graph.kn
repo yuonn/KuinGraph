@@ -1,0 +1,72 @@
++class Graph()
+	+var posX: float
+	+var posY: float
+	+var width: float
+	+var height: float
+	+var labelFont: draw@Font
+	+var varFont: draw@Font
+	+var fontColor: int
+	+var labelX: []char
+	+var labelY: []char
+	+var labelSize: float
+	+var axisColor: int
+	
+	*func ctor()
+		do me.posX :: 50.0
+		do me.posY :: 50.0
+		do me.width :: 400.0
+		do me.height :: 300.0
+		do me.labelFont :: draw@makeFont(null, 12, false, false, true, 0.0)
+		do me.varFont :: draw@makeFont(null, 12, false, false, true, 0.0)
+		do me.fontColor :: draw@black
+		do me.labelX :: ""
+		do me.labelY :: ""
+		do me.labelSize :: 55.0
+		do me.axisColor :: draw@black
+	end func
+	
+	func plotAxis(minX: float, maxX: float, minY: float, maxY: float) {軸の描画}
+		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
+		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
+		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
+		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.width, me.posY, me.axisColor)
+	end func
+	
+	func plotLabel()
+		do me.labelFont.draw(me.posX + me.labelSize + (me.width - me.labelSize) / 2.0 - (^me.labelX) $ float * 5.0, me.posY + me.height - 0.65 * me.labelSize, me.labelX, me.fontColor)
+	end func
+	
+	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
+		var n: int :: ^y
+		var maxX: float :: x.max() + (x.max() - x.min()) / 20.0
+		var minX: float :: x.min() - (x.max() - x.min()) / 20.0
+		var maxY: float :: y.max() + (y.max() - y.min()) / 20.0
+		var minY: float :: y.min() - (y.max() - y.min()) / 20.0
+		do me.plotAxis(minX, maxX, minY, maxY)
+		do me.plotLabel()
+		var baseX: float :: me.posX + me.labelSize
+		var baseY: float :: me.posY + me.height - me.labelSize
+		var scaleX: float :: (me.width - me.labelSize) / (maxX - minX)
+		var scaleY: float :: (me.height - me.labelSize) / (maxY - minY)
+		for i(0, n - 2)
+			do draw@line(x[i] * scaleX - minX * scaleX + baseX, -y[i] * scaleY + minY * scaleY + baseY, x[i + 1] * scaleX - minX * scaleX + baseX, -y[i + 1] * scaleY + minY * scaleY + baseY, color)
+		end for
+	end func
+	
+	+func scatterPlot(x: []float, y: []float, size: float, color: int)
+		var n: int :: ^y
+		var maxX: float :: x.max() + (x.max() - x.min()) / 20.0
+		var minX: float :: x.min() - (x.max() - x.min()) / 20.0
+		var maxY: float :: y.max() + (y.max() - y.min()) / 20.0
+		var minY: float :: y.min() - (y.max() - y.min()) / 20.0
+		do me.plotAxis(minX, maxX, minY, maxY)
+		do me.plotLabel()
+		var baseX: float :: me.posX + me.labelSize
+		var baseY: float :: me.posY + me.height - me.labelSize
+		var scaleX: float :: (me.width - me.labelSize) / (maxX - minX)
+		var scaleY: float :: (me.height - me.labelSize) / (maxY - minY)
+		for i(0, n - 1)
+			do draw@circle(x[i] * scaleX - minX * scaleX + baseX, -y[i] * scaleY + minY * scaleY + baseY, size, size, color)
+		end for
+	end func
+end class

@@ -1,0 +1,27 @@
+var wndMain: wnd@Wnd
+var drawMain: wnd@Draw
+
+func main()
+	do @wndMain :: wnd@makeWnd(null, %aspect, 800, 450, "GraphTest")
+	do @drawMain :: wnd@makeDraw(@wndMain, 0, 0, 800, 450, %scale, %scale, false)
+	do draw@clearColor(draw@white)
+	var graph: \graph@Graph :: #\graph@Graph
+	do graph.labelX :: "x-axis"
+	
+	var x: []float :: #[100]float
+	var y: []float :: #[100]float
+	for i(0, ^y - 1)
+		do x[i] :: i $ float * 0.1
+		do y[i] :: f(x[i] $ float)
+	end for
+	
+	func f(x: float): float
+		ret lib@sin(x)
+	end func
+	
+	while(wnd@act())
+		do graph.plot(x, y, 0xFFAAAAFF)
+		do graph.scatterPlot(x, y, 2.0, 0xFFAAAAFF)
+		do draw@render(60)
+	end while
+end func
