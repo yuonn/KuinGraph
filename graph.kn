@@ -25,18 +25,21 @@
 		do me.axisColor :: draw@black
 	end func
 	
-	func plotAxis(minX: float, maxX: float, minY: float, maxY: float) {軸の描画}
+	
+	
+	func drawAxis(minX: float, maxX: float, minY: float, maxY: float) {軸の描画}
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
 		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.width, me.posY, me.axisColor)
+		do me.drawScale(minX, maxX, minY, maxY)
 	end func
 	
-	func drawLabel()
+	func drawScale(minX: float, maxX: float, minY: float, maxY: float) {目盛りの表示}
+	end func
+	
+	func drawLabel() {TODO:縦軸のラベルの表示}
 		do me.labelFont.draw(me.posX + me.labelSize + (me.width - me.labelSize) / 2.0 - (^me.labelX) $ float * 5.0, me.posY + me.height - 0.65 * me.labelSize, me.labelX, me.fontColor)
-	end func
-	
-	func drawScale() {目盛りの表示}
 	end func
 	
 	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
@@ -45,7 +48,7 @@
 		var minX: float :: x.min() - (x.max() - x.min()) / 20.0
 		var maxY: float :: y.max() + (y.max() - y.min()) / 20.0
 		var minY: float :: y.min() - (y.max() - y.min()) / 20.0
-		do me.plotAxis(minX, maxX, minY, maxY)
+		do me.drawAxis(minX, maxX, minY, maxY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
@@ -56,13 +59,13 @@
 		end for
 	end func
 	
-	+func scatterPlot(x: []float, y: []float, size: float, color: int)
+	+func scatterPlot(x: []float, y: []float, size: float, color: int) {散布図}
 		var n: int :: ^y
 		var maxX: float :: x.max() + (x.max() - x.min()) / 20.0
 		var minX: float :: x.min() - (x.max() - x.min()) / 20.0
 		var maxY: float :: y.max() + (y.max() - y.min()) / 20.0
 		var minY: float :: y.min() - (y.max() - y.min()) / 20.0
-		do me.plotAxis(minX, maxX, minY, maxY)
+		do me.drawAxis(minX, maxX, minY, maxY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
@@ -71,5 +74,13 @@
 		for i(0, n - 1)
 			do draw@circle(x[i] * scaleX - minX * scaleX + baseX, -y[i] * scaleY + minY * scaleY + baseY, size, size, color)
 		end for
+	end func
+	
+	+func barChart(label: [][]char, value: float, color: int) {棒グラフ}
+		
+	end func
+	
+	+func circleChart(label: [][]char, value: []float, color: []int) {円グラフ}
+		
 	end func
 end class
