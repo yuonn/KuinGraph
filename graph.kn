@@ -41,51 +41,39 @@
 	end func
 	
 	func drawScale(minX: float, maxX: float, minY: float, maxY: float) {目盛りの表示}
-		var interval: float :: (maxX - minX) / 5.0 {間隔の目安}
-		var shift: int :: 0
-		{間隔を1以上の数にする}
-		while(interval.toStr()[0] $ int <= 0)
-			do interval :* 10.0
-			do shift :+ 1
-		end while
-		{間隔をキリの良い数字にする}
-		var intervalInt: int :: lib@ceil(interval) $ int
-		{
-		TODO:ここに5づつ，2づつ，1づつになるように場合分け
-		}
-		do interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
-		
-		var scaleMax: float :: interval * lib@ceil(maxX / interval)
-		var nextScale: float :: scaleMax - interval
-		var n: int :: lib@ceil((scaleMax - minX) / interval) $ int {軸の分割数}
-		var scaleMin: float :: scaleMax - interval * n $ float
+		var scaleX: []float :: me.autoScale(minX, maxX)
+		var scaleMinX: float :: scaleX[0]
+		var scaleMaxX: float :: scaleX[1]
+		var intervalX: float :: scaleX[2]
+		var nX: int :: scaleX[3] $ int
 		var drawBaseX: float :: me.posX + me.labelSize
-		var drawScaleX: float :: (me.width - me.labelSize) / (scaleMax - scaleMin)
-		for i(0, n)
-			do me.varFont.draw(interval * i $ float * drawScaleX + drawBaseX, me.posY + me.height - me.labelSize, (scaleMin + interval * i $ float).toStr(), me.axisColor)
+		var drawScaleX: float :: (me.width - me.labelSize) / (scaleMaxX - scaleMinX)
+		for i(0, nX)
+			do me.varFont.draw(intervalX * i $ float * drawScaleX + drawBaseX, me.posY + me.height - me.labelSize, (scaleMinX + intervalX * i $ float).toStr(), me.axisColor)
 		end for
 	end func
 	
-	func autoScale(min: float, max: float): []float {[0]:目盛りの最小値,[1]:目盛りの最大値,[2]:目盛りの間隔}
+	{目盛りの計算}
+	func autoScale(min: float, max: float): []float {[0]:目盛りの最小値,[1]:目盛りの最大値,[2]:目盛りの間隔,[3]:分割数}
 		var interval: float :: (max - min) / 5.0 {間隔の目安}
 		var shift: int :: 0
 		{間隔を1以上の数にする}
-		while(interval.toStr()[0] $ int <= 0)
+		while(interval < 1.0)
 			do interval :* 10.0
 			do shift :+ 1
 		end while
 		{間隔をキリの良い数字にする}
-		var intervalInt: int :: lib@ceil(interval) $ int
+		var intervalInt: int :: lib@round(interval, 0) $ int
 		{
 		TODO:ここに5づつ，2づつ，1づつになるように場合分け
 		}
 		do interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
 		
 		var scaleMax: float :: interval * lib@ceil(max / interval)
-		do me.varFont.draw(me.posX + me.width, me.posY + me.height - me.labelSize, scaleMax.toStr(), me.axisColor)
 		var nextScale: float :: scaleMax - interval
 		var n: int :: lib@ceil((scaleMax - min) / interval) $ int {軸の分割数}
 		var scaleMin: float :: scaleMax - interval * n $ float
+		ret[scaleMin, scaleMax, interval, n $ float]
 	end func
 	
 	func drawLabel() {TODO:縦軸のラベルの表示}
@@ -94,35 +82,37 @@
 	
 	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
 		var n: int :: ^y
-		var maxX: float :: x.max()
-		var minX: float :: x.min()
-		var maxY: float :: y.max()
+		var scaleX: []float :: me.autoScale(x.min(), x.max())
+		var minX: float :: scaleX[0]
+		var maxX: float :: scaleX[1]
 		var minY: float :: y.min()
+		var maxY: float :: y.max()
 		do me.drawAxis(minX, maxX, minY, maxY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
-		var scaleX: float :: (me.width - me.labelSize) / (maxX - minX)
-		var scaleY: float :: (me.height - me.labelSize) / (maxY - minY)
+		var magnifyX: float :: (me.width - me.labelSize) / (maxX - minX)
+		var magnifyY: float :: (me.height - me.labelSize) / (maxY - minY)
 		for i(0, n - 2)
-			do draw@line(x[i] * scaleX - minX * scaleX + baseX, -y[i] * scaleY + minY * scaleY + baseY, x[i + 1] * scaleX - minX * scaleX + baseX, -y[i + 1] * scaleY + minY * scaleY + baseY, color)
+			do draw@line(x[i] * magnifyX - minX * magnifyX + baseX, -y[i] * magnifyY + minY * magnifyY + baseY, x[i + 1] * magnifyX - minX * magnifyX + baseX, -y[i + 1] * magnifyY + minY * magnifyY + baseY, color)
 		end for
 	end func
 	
 	+func scatterPlot(x: []float, y: []float, size: float, color: int) {散布図}
 		var n: int :: ^y
-		var maxX: float :: x.max()
-		var minX: float :: x.min()
+		var scaleX: []float :: me.autoScale(x.min(), x.max())
+		var minX: float :: scaleX[0]
+		var maxX: float :: scaleX[1]
 		var maxY: float :: y.max()
 		var minY: float :: y.min()
 		do me.drawAxis(minX, maxX, minY, maxY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
-		var scaleX: float :: (me.width - me.labelSize) / (maxX - minX)
-		var scaleY: float :: (me.height - me.labelSize) / (maxY - minY)
+		var magnifyX: float :: (me.width - me.labelSize) / (maxX - minX)
+		var magnifyY: float :: (me.height - me.labelSize) / (maxY - minY)
 		for i(0, n - 1)
-			do draw@circle(x[i] * scaleX - minX * scaleX + baseX, -y[i] * scaleY + minY * scaleY + baseY, size, size, color)
+			do draw@circle(x[i] * magnifyX - minX * magnifyX + baseX, -y[i] * magnifyY + minY * magnifyY + baseY, size, size, color)
 		end for
 	end func
 	
