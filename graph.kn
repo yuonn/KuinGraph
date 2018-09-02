@@ -32,23 +32,15 @@
 		do me.height :: height
 	end func
 	
-	class Scale()
-		+var min: float
-		+var max: float
-		+var interval: float
-		+var n: int
-	end class
-	
-	func drawAxis(minX: float, maxX: float, minY: float, maxY: float) {軸の描画}
+	func drawAxis(scaleX: []float, scaleY: []float) {軸の描画, TODO:Scaleクラスで受け取る}
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
 		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.width, me.posY, me.axisColor)
-		do me.drawScale(minX, maxX, minY, maxY)
+		do me.drawScale(scaleX, scaleY)
 	end func
 	
-	func drawScale(minX: float, maxX: float, minY: float, maxY: float) {目盛りの表示}
-		var scaleX: []float :: me.autoScale(minX, maxX)
+	func drawScale(scaleX: []float, scaleY: []float) {目盛りの表示，TODO:Scaleクラスで受け取る}
 		var scaleMinX: float :: scaleX[0]
 		var scaleMaxX: float :: scaleX[1]
 		var intervalX: float :: scaleX[2]
@@ -56,12 +48,15 @@
 		var drawBaseX: float :: me.posX + me.labelSize
 		var drawMagnifyX: float :: (me.width - me.labelSize) / (scaleMaxX - scaleMinX)
 		for i(0, nX)
-			do me.varFont.draw(intervalX * i $ float * drawMagnifyX + drawBaseX, me.posY + me.height - me.labelSize, (scaleMinX + intervalX * i $ float).toStr(), me.axisColor)
+			var drawPointX: float :: intervalX * i $ float * drawMagnifyX + drawBaseX
+			var drawPointY: float :: me.posY + me.height - me.labelSize
+			do draw@line(drawPointX, drawPointY, drawPointX, drawPointY - 10.0, me.axisColor)
+			do me.varFont.draw(drawPointX, drawPointY, (scaleMinX + intervalX * i $ float).toStr(), me.axisColor)
 		end for
 	end func
 	
 	{目盛りの計算}
-	func autoScale(min: float, max: float): []float {[0]:目盛りの最小値,[1]:目盛りの最大値,[2]:目盛りの間隔,[3]:分割数}
+	func autoScale(min: float, max: float): []float {[0]:目盛りの最小値,[1]:目盛りの最大値,[2]:目盛りの間隔,[3]:分割数，TODO:Scaleクラスで返す}
 		var interval: float :: (max - min) / 5.0 {間隔の目安}
 		var shift: int :: 0
 		{間隔を1以上の数にする}
@@ -91,16 +86,17 @@
 		var scaleX: []float :: me.autoScale(x.min(), x.max())
 		var minX: float :: scaleX[0]
 		var maxX: float :: scaleX[1]
-		var minY: float :: y.min()
-		var maxY: float :: y.max()
-		do me.drawAxis(minX, maxX, minY, maxY)
+		var scaleY: []float :: me.autoScale(y.min(), y.max())
+		var minY: float :: scaleY[0]
+		var maxY: float :: scaleY[1]
+		do me.drawAxis(scaleX, scaleY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
 		var magnifyX: float :: (me.width - me.labelSize) / (maxX - minX)
 		var magnifyY: float :: (me.height - me.labelSize) / (maxY - minY)
 		for i(0, n - 2)
-			do draw@line(x[i] * magnifyX - minX * magnifyX + baseX, -y[i] * magnifyY + minY * magnifyY + baseY, x[i + 1] * magnifyX - minX * magnifyX + baseX, -y[i + 1] * magnifyY + minY * magnifyY + baseY, color)
+			do draw@line((x[i] - minX) * magnifyX + baseX, (minY - y[i]) * magnifyY + baseY, (x[i + 1] - minX) * magnifyX + baseX, (minY - y[i + 1]) * magnifyY + baseY, color)
 		end for
 	end func
 	
@@ -109,16 +105,17 @@
 		var scaleX: []float :: me.autoScale(x.min(), x.max())
 		var minX: float :: scaleX[0]
 		var maxX: float :: scaleX[1]
-		var maxY: float :: y.max()
-		var minY: float :: y.min()
-		do me.drawAxis(minX, maxX, minY, maxY)
+		var scaleY: []float :: me.autoScale(y.min(), y.max())
+		var minY: float :: scaleY[0]
+		var maxY: float :: scaleY[1]
+		do me.drawAxis(scaleX, scaleY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
 		var magnifyX: float :: (me.width - me.labelSize) / (maxX - minX)
 		var magnifyY: float :: (me.height - me.labelSize) / (maxY - minY)
 		for i(0, n - 1)
-			do draw@circle(x[i] * magnifyX - minX * magnifyX + baseX, -y[i] * magnifyY + minY * magnifyY + baseY, size, size, color)
+			do draw@circle((x[i] - minX) * magnifyX + baseX, (minY - y[i]) * magnifyY + baseY, size, size, color)
 		end for
 	end func
 	
