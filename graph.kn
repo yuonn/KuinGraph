@@ -84,12 +84,14 @@
 			do shift :+ 1
 		end while
 		{間隔をキリの良い数字にする}
-		var intervalInt: int :: lib@round(interval, 0) $ int
-		if(intervalInt > 5)
-			do intervalInt :: 10
-		elif(intervalInt > 2)
-			do intervalInt :: 5
-		end if
+		var intervalInt: int :: interval $ int
+		do intervalInt :: lib@round(intervalInt $ float, -1 * (^intervalInt.toStr() - 1)) $ int
+		switch(intervalInt.toStr()[0])
+		case '6', '7', '8', '9'
+			do intervalInt :: 10 * 10 ^ (^intervalInt.toStr() - 1)
+		case '3', '4', '5'
+			do intervalInt :: 5 * 10 ^ (^intervalInt.toStr() - 1)
+		end switch
 		
 		do interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
 		var scaleMax: float :: interval * lib@ceil(max / interval)

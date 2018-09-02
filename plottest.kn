@@ -17,7 +17,7 @@ func main()
 	end for
 	
 	func f(x: float): float
-		ret lib@sin(x)
+		ret lib@sin(x) * 1000.0
 	end func
 	
 	while(wnd@act())
