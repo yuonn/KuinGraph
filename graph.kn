@@ -41,6 +41,7 @@
 	end func
 	
 	func drawScale(scaleX: []float, scaleY: []float) {目盛りの表示，TODO:Scaleクラスで受け取る}
+		{X軸の目盛り描画}
 		var scaleMinX: float :: scaleX[0]
 		var scaleMaxX: float :: scaleX[1]
 		var intervalX: float :: scaleX[2]
@@ -52,6 +53,20 @@
 			var drawPointY: float :: me.posY + me.height - me.labelSize
 			do draw@line(drawPointX, drawPointY, drawPointX, drawPointY - 10.0, me.axisColor)
 			do me.varFont.draw(drawPointX, drawPointY, (scaleMinX + intervalX * i $ float).toStr(), me.axisColor)
+		end for
+		{Y軸の目盛り描画}
+		var scaleMinY: float :: scaleY[0]
+		var scaleMaxY: float :: scaleY[1]
+		var intervalY: float :: scaleY[2]
+		var nY: int :: scaleY[3] $ int
+		var drawBaseY: float :: me.posY + me.height - me.labelSize
+		var drawMagnifyY: float :: (me.height - me.labelSize) / (scaleMaxY - scaleMinY)
+		for i(0, nY)
+			var drawPointX: float :: me.posX + me.labelSize
+			var drawPointY: float :: drawBaseY - intervalY * i $ float * drawMagnifyY
+			do draw@line(drawPointX, drawPointY, drawPointX + 10.0, drawPointY, me.axisColor)
+			var str: []char :: (scaleMinY + intervalY * i $ float).toStr()
+			do me.varFont.draw(drawPointX - (^str * 10) $ float, drawPointY - 10.0, str, me.axisColor) {TODO:他のFontサイズでもきれいに描画できるようにする}
 		end for
 	end func
 	
