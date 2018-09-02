@@ -3,9 +3,11 @@
 	+var posY: float
 	+var width: float
 	+var height: float
+	+var titleFont: draw@Font
 	+var labelFont: draw@Font
 	+var varFont: draw@Font
 	+var fontColor: int
+	+var title: []char
 	+var labelX: []char
 	+var labelY: []char
 	+var labelSize: float
@@ -16,9 +18,11 @@
 		do me.posY :: 50.0
 		do me.width :: 400.0
 		do me.height :: 300.0
+		do me.titleFont :: draw@makeFont(null, 14, false, false, true, 0.0)
 		do me.labelFont :: draw@makeFont(null, 12, false, false, true, 0.0)
 		do me.varFont :: draw@makeFont(null, 12, false, false, true, 0.0)
 		do me.fontColor :: draw@black
+		do me.title :: ""
 		do me.labelX :: ""
 		do me.labelY :: ""
 		do me.labelSize :: 55.0
@@ -66,7 +70,7 @@
 			var drawPointY: float :: drawBaseY - intervalY * i $ float * drawMagnifyY
 			do draw@line(drawPointX, drawPointY, drawPointX + 10.0, drawPointY, me.axisColor)
 			var str: []char :: (scaleMinY + intervalY * i $ float).toStr()
-			do me.varFont.draw(drawPointX - (^str * 10) $ float, drawPointY - 10.0, str, me.axisColor) {TODO:他のFontサイズでもきれいに描画できるようにする}
+			do me.varFont.draw(drawPointX - (^str * 10) $ float - 5.0, drawPointY - 10.0, str, me.axisColor) {TODO:他のFontサイズでもきれいに描画できるようにする}
 		end for
 	end func
 	
@@ -96,6 +100,10 @@
 		do me.labelFont.draw(me.posX + me.labelSize + (me.width - me.labelSize) / 2.0 - (^me.labelX) $ float * 5.0, me.posY + me.height - 0.65 * me.labelSize, me.labelX, me.fontColor)
 	end func
 	
+	func drawTitle()
+		do me.titleFont.draw(me.posX + me.width / 2.0 - (^me.title) $ float * 8.0, me.posY + me.height, me.title, me.fontColor)
+	end func
+	
 	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
 		var n: int :: ^y
 		var scaleX: []float :: me.autoScale(x.min(), x.max())
@@ -105,7 +113,6 @@
 		var minY: float :: scaleY[0]
 		var maxY: float :: scaleY[1]
 		do me.drawAxis(scaleX, scaleY)
-		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
 		var magnifyX: float :: (me.width - me.labelSize) / (maxX - minX)
@@ -113,6 +120,8 @@
 		for i(0, n - 2)
 			do draw@line((x[i] - minX) * magnifyX + baseX, (minY - y[i]) * magnifyY + baseY, (x[i + 1] - minX) * magnifyX + baseX, (minY - y[i + 1]) * magnifyY + baseY, color)
 		end for
+		do me.drawLabel()
+		do me.drawTitle()
 	end func
 	
 	+func scatterPlot(x: []float, y: []float, size: float, color: int) {散布図}
@@ -124,7 +133,6 @@
 		var minY: float :: scaleY[0]
 		var maxY: float :: scaleY[1]
 		do me.drawAxis(scaleX, scaleY)
-		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
 		var magnifyX: float :: (me.width - me.labelSize) / (maxX - minX)
@@ -132,6 +140,8 @@
 		for i(0, n - 1)
 			do draw@circle((x[i] - minX) * magnifyX + baseX, (minY - y[i]) * magnifyY + baseY, size, size, color)
 		end for
+		do me.drawLabel()
+		do me.drawTitle()
 	end func
 	
 	+func barChart(label: [][]char, value: float, color: int) {棒グラフ}
