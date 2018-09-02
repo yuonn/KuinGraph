@@ -75,7 +75,6 @@
 		TODO:ここに5づつ，2づつ，1づつになるように場合分け
 		}
 		do interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
-		
 		var scaleMax: float :: interval * lib@ceil(max / interval)
 		var nextScale: float :: scaleMax - interval
 		var n: int :: lib@ceil((scaleMax - min) / interval) $ int {軸の分割数}
