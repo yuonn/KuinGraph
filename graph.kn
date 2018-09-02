@@ -25,7 +25,12 @@
 		do me.axisColor :: draw@black
 	end func
 	
-	
+	+func setPos(posX: float, posY: float, width: float, height: float)
+		do me.posX :: posX
+		do me.posY :: posY
+		do me.width :: width
+		do me.height :: height
+	end func
 	
 	func drawAxis(minX: float, maxX: float, minY: float, maxY: float) {軸の描画}
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
@@ -36,6 +41,51 @@
 	end func
 	
 	func drawScale(minX: float, maxX: float, minY: float, maxY: float) {目盛りの表示}
+		var interval: float :: (maxX - minX) / 5.0 {間隔の目安}
+		var shift: int :: 0
+		{間隔を1以上の数にする}
+		while(interval.toStr()[0] $ int <= 0)
+			do interval :* 10.0
+			do shift :+ 1
+		end while
+		{間隔をキリの良い数字にする}
+		var intervalInt: int :: lib@ceil(interval) $ int
+		{
+		TODO:ここに5づつ，2づつ，1づつになるように場合分け
+		}
+		do interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
+		
+		var scaleMax: float :: interval * lib@ceil(maxX / interval)
+		var nextScale: float :: scaleMax - interval
+		var n: int :: lib@ceil((scaleMax - minX) / interval) $ int {軸の分割数}
+		var scaleMin: float :: scaleMax - interval * n $ float
+		var drawBaseX: float :: me.posX + me.labelSize
+		var drawScaleX: float :: (me.width - me.labelSize) / (scaleMax - scaleMin)
+		for i(0, n)
+			do me.varFont.draw(interval * i $ float * drawScaleX + drawBaseX, me.posY + me.height - me.labelSize, (scaleMin + interval * i $ float).toStr(), me.axisColor)
+		end for
+	end func
+	
+	func autoScale(min: float, max: float): []float {[0]:目盛りの最小値,[1]:目盛りの最大値,[2]:目盛りの間隔}
+		var interval: float :: (max - min) / 5.0 {間隔の目安}
+		var shift: int :: 0
+		{間隔を1以上の数にする}
+		while(interval.toStr()[0] $ int <= 0)
+			do interval :* 10.0
+			do shift :+ 1
+		end while
+		{間隔をキリの良い数字にする}
+		var intervalInt: int :: lib@ceil(interval) $ int
+		{
+		TODO:ここに5づつ，2づつ，1づつになるように場合分け
+		}
+		do interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
+		
+		var scaleMax: float :: interval * lib@ceil(max / interval)
+		do me.varFont.draw(me.posX + me.width, me.posY + me.height - me.labelSize, scaleMax.toStr(), me.axisColor)
+		var nextScale: float :: scaleMax - interval
+		var n: int :: lib@ceil((scaleMax - min) / interval) $ int {軸の分割数}
+		var scaleMin: float :: scaleMax - interval * n $ float
 	end func
 	
 	func drawLabel() {TODO:縦軸のラベルの表示}
@@ -44,10 +94,10 @@
 	
 	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
 		var n: int :: ^y
-		var maxX: float :: x.max() + (x.max() - x.min()) / 20.0
-		var minX: float :: x.min() - (x.max() - x.min()) / 20.0
-		var maxY: float :: y.max() + (y.max() - y.min()) / 20.0
-		var minY: float :: y.min() - (y.max() - y.min()) / 20.0
+		var maxX: float :: x.max()
+		var minX: float :: x.min()
+		var maxY: float :: y.max()
+		var minY: float :: y.min()
 		do me.drawAxis(minX, maxX, minY, maxY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
@@ -61,10 +111,10 @@
 	
 	+func scatterPlot(x: []float, y: []float, size: float, color: int) {散布図}
 		var n: int :: ^y
-		var maxX: float :: x.max() + (x.max() - x.min()) / 20.0
-		var minX: float :: x.min() - (x.max() - x.min()) / 20.0
-		var maxY: float :: y.max() + (y.max() - y.min()) / 20.0
-		var minY: float :: y.min() - (y.max() - y.min()) / 20.0
+		var maxX: float :: x.max()
+		var minX: float :: x.min()
+		var maxY: float :: y.max()
+		var minY: float :: y.min()
 		do me.drawAxis(minX, maxX, minY, maxY)
 		do me.drawLabel()
 		var baseX: float :: me.posX + me.labelSize
