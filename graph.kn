@@ -32,6 +32,13 @@
 		do me.height :: height
 	end func
 	
+	class Scale()
+		+var min: float
+		+var max: float
+		+var interval: float
+		+var n: int
+	end class
+	
 	func drawAxis(minX: float, maxX: float, minY: float, maxY: float) {軸の描画}
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
@@ -47,9 +54,9 @@
 		var intervalX: float :: scaleX[2]
 		var nX: int :: scaleX[3] $ int
 		var drawBaseX: float :: me.posX + me.labelSize
-		var drawScaleX: float :: (me.width - me.labelSize) / (scaleMaxX - scaleMinX)
+		var drawMagnifyX: float :: (me.width - me.labelSize) / (scaleMaxX - scaleMinX)
 		for i(0, nX)
-			do me.varFont.draw(intervalX * i $ float * drawScaleX + drawBaseX, me.posY + me.height - me.labelSize, (scaleMinX + intervalX * i $ float).toStr(), me.axisColor)
+			do me.varFont.draw(intervalX * i $ float * drawMagnifyX + drawBaseX, me.posY + me.height - me.labelSize, (scaleMinX + intervalX * i $ float).toStr(), me.axisColor)
 		end for
 	end func
 	
