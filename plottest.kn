@@ -7,7 +7,7 @@ func main()
 	do draw@clearColor(draw@white)
 	var graph: \graph@Graph :: #\graph@Graph
 	do graph.labelX :: "x"
-	do graph.title :: "1000sin(x)"
+	do graph.title :: "random"
 	
 	var x: []float :: #[20]float
 	var y: []float :: #[20]float
