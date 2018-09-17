@@ -7,18 +7,14 @@ func main()
 	do draw@clearColor(draw@white)
 	var graph: \graph@Graph :: #\graph@Graph
 	do graph.labelX :: "x"
-	do graph.title :: "sin(x)"
+	do graph.title :: "1000sin(x)"
 	
-	var x: []float :: #[100]float
-	var y: []float :: #[100]float
+	var x: []float :: #[20]float
+	var y: []float :: #[20]float
 	for i(0, ^y - 1)
-		do x[i] :: i $ float * lib@pi / 50.0
-		do y[i] :: f(x[i])
+		do x[i] :: i $ float
+		do y[i] :: lib@rndFloat(-1000.0, 1000.0)
 	end for
-	
-	func f(x: float): float
-		ret lib@sin(x) * 1000.0
-	end func
 	
 	var scaleY: \graph@Scale :: #\graph@Scale
 	do scaleY.setScale(-1200.0, 1200.0, 400.0)
@@ -26,7 +22,7 @@ func main()
 	
 	while(wnd@act())
 		do graph.plot(x, y, 0xFFAAAAFF)
-		do graph.scatterPlot(x, y, 2.0, 0xFFAAAAFF)
+		do graph.scatterPlot(x, y, 3.0, 0xFFAAAAFF)
 		do draw@render(60)
 	end while
 end func
