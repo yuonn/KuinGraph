@@ -6,7 +6,6 @@ func main()
 	do @drawMain :: wnd@makeDraw(@wndMain, 0, 0, 800, 450, %scale, %scale, false)
 	do draw@clearColor(draw@white)
 	var graph: \graph@Graph :: #\graph@Graph
-	var scale: \graph@Scale :: #\graph@Scale
 	do graph.labelX :: "x"
 	do graph.title :: "sin(x)"
 	
@@ -20,6 +19,10 @@ func main()
 	func f(x: float): float
 		ret lib@sin(x) * 1000.0
 	end func
+	
+	var scaleY: \graph@Scale :: #\graph@Scale
+	do scaleY.setScale(-1200.0, 1200.0, 400.0)
+	do graph.scaleY :: scaleY
 	
 	while(wnd@act())
 		do graph.plot(x, y, 0xFFAAAAFF)

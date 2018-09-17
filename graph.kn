@@ -12,6 +12,8 @@
 	+var labelY: []char
 	+var labelSize: float
 	+var axisColor: int
+	+var scaleX: @Scale
+	+var scaleY: @Scale
 	
 	*func ctor()
 		do me.posX :: 50.0
@@ -105,15 +107,19 @@
 	
 	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
 		var n: int :: ^y
-		var scaleX: @Scale :: me.autoScale(x.min(), x.max())
-		var scaleY: @Scale :: me.autoScale(y.min(), y.max())
-		do me.drawAxis(scaleX, scaleY)
+		if(me.scaleX =& null)
+			do me.scaleX :: me.autoScale(x.min(), x.max())
+		end if
+		if(me.scaleY =& null)
+			do me.scaleY :: me.autoScale(y.min(), y.max())
+		end if
+		do me.drawAxis(me.scaleX, me.scaleY)
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
-		var magnifyX: float :: (me.width - me.labelSize) / (scaleX.max - scaleX.min)
-		var magnifyY: float :: (me.height - me.labelSize) / (scaleY.max - scaleY.min)
+		var magnifyX: float :: (me.width - me.labelSize) / (me.scaleX.max - me.scaleX.min)
+		var magnifyY: float :: (me.height - me.labelSize) / (me.scaleY.max - me.scaleY.min)
 		for i(0, n - 2)
-			do draw@line((x[i] - scaleX.min) * magnifyX + baseX, (scaleY.min - y[i]) * magnifyY + baseY, (x[i + 1] - scaleX.min) * magnifyX + baseX, (scaleY.min - y[i + 1]) * magnifyY + baseY, color)
+			do draw@line((x[i] - me.scaleX.min) * magnifyX + baseX, (me.scaleY.min - y[i]) * magnifyY + baseY, (x[i + 1] - me.scaleX.min) * magnifyX + baseX, (me.scaleY.min - y[i + 1]) * magnifyY + baseY, color)
 		end for
 		do me.drawLabel()
 		do me.drawTitle()
@@ -121,31 +127,35 @@
 	
 	+func scatterPlot(x: []float, y: []float, size: float, color: int) {散布図}
 		var n: int :: ^y
-		var scaleX: @Scale :: me.autoScale(x.min(), x.max())
-		var scaleY: @Scale :: me.autoScale(y.min(), y.max())
-		do me.drawAxis(scaleX, scaleY)
+		if(me.scaleX =& null)
+			do me.scaleX :: me.autoScale(x.min(), x.max())
+		end if
+		if(me.scaleY =& null)
+			do me.scaleY :: me.autoScale(y.min(), y.max())
+		end if
+		do me.drawAxis(me.scaleX, me.scaleY)
 		var baseX: float :: me.posX + me.labelSize
 		var baseY: float :: me.posY + me.height - me.labelSize
-		var magnifyX: float :: (me.width - me.labelSize) / (scaleX.max - scaleX.min)
-		var magnifyY: float :: (me.height - me.labelSize) / (scaleY.max - scaleY.min)
+		var magnifyX: float :: (me.width - me.labelSize) / (me.scaleX.max - me.scaleX.min)
+		var magnifyY: float :: (me.height - me.labelSize) / (me.scaleY.max - me.scaleY.min)
 		for i(0, n - 1)
-			do draw@circle((x[i] - scaleX.min) * magnifyX + baseX, (scaleY.min - y[i]) * magnifyY + baseY, size, size, color)
+			do draw@circle((x[i] - me.scaleX.min) * magnifyX + baseX, (me.scaleY.min - y[i]) * magnifyY + baseY, size, size, color)
 		end for
 		do me.drawLabel()
 		do me.drawTitle()
 	end func
-	
-	+func barChart(label: [][]char, value: float, color: int) {棒グラフ}
-		
-	end func
-	
-	+func circleChart(label: [][]char, value: []float, color: []int) {円グラフ}
-		
-	end func
 end class
 
 +class Scale()
-	+var max: float
 	+var min: float
+	+var max: float
 	+var interval: float
+	
+	+func setScale(min: float, max: float, interval: float)
+		assert min < max
+		assert((max - min) / interval) % 1.0 = 0.0
+		do me.min :: min
+		do me.max :: max
+		do me.interval :: interval
+	end func
 end class
