@@ -12,8 +12,8 @@
 	+var labelY: []char
 	+var labelSize: float
 	+var axisColor: int
-	+var scaleX: @Scale
-	+var scaleY: @Scale
+	+var scaleX: Scale
+	+var scaleY: Scale
 	
 	*func ctor()
 		do me.posX :: 50.0
@@ -38,7 +38,34 @@
 		do me.height :: height
 	end func
 	
-	func drawAxis(scaleX: @Scale, scaleY: @Scale) {軸の描画, TODO:Scaleクラスで受け取る}
+	class Scale()
+		+var min: float
+		+var max: float
+		+var interval: float
+		
+		+func setScale(min: float, max: float, interval: float)
+			assert min < max
+			assert interval > 0.0
+			assert((max - min) / interval) % 1.0 = 0.0
+			do me.min :: min
+			do me.max :: max
+			do me.interval :: interval
+		end func
+	end class
+	
+	+func setScaleX(min: float, max: float, interval: float)
+		var scale: Scale :: #Scale
+		do scale.setScale(min, max, interval)
+		do me.scaleX :: scale
+	end func
+	
+	+func setScaleY(min: float, max: float, interval: float)
+		var scale: Scale :: #Scale
+		do scale.setScale(min, max, interval)
+		do me.scaleY :: scale
+	end func
+	
+	func drawAxis(scaleX: Scale, scaleY: Scale) {軸の描画, TODO:Scaleクラスで受け取る}
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
 		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
@@ -46,7 +73,7 @@
 		do me.drawScale(scaleX, scaleY)
 	end func
 	
-	func drawScale(scaleX: @Scale, scaleY: @Scale) {目盛りの表示，TODO:Scaleクラスで受け取る}
+	func drawScale(scaleX: Scale, scaleY: Scale) {目盛りの表示，TODO:Scaleクラスで受け取る}
 		{X軸の目盛り描画}
 		var nX: int :: ((scaleX.max - scaleX.min) / scaleX.interval) $ int
 		var drawBaseX: float :: me.posX + me.labelSize
@@ -71,7 +98,7 @@
 	end func
 	
 	{目盛りの計算}
-	func autoScale(min: float, max: float): @Scale
+	func autoScale(min: float, max: float): Scale
 		var interval: float :: (max - min) / 5.0 {間隔の目安}
 		var shift: int :: 0
 		{間隔を1以上の数にする}
@@ -89,7 +116,7 @@
 			do intervalInt :: 5 * 10 ^ (^intervalInt.toStr() - 1)
 		end switch
 		
-		var scale: @Scale :: #@Scale
+		var scale: Scale :: #Scale
 		do scale.interval :: intervalInt $ float * 10.0 ^ (-shift $ float)
 		do scale.max :: scale.interval * lib@ceil(max / scale.interval)
 		var n: int :: lib@ceil((scale.max - min) / scale.interval) $ int {軸の分割数}
@@ -146,17 +173,3 @@
 	end func
 end class
 
-+class Scale()
-	+var min: float
-	+var max: float
-	+var interval: float
-	
-	+func setScale(min: float, max: float, interval: float)
-		assert min < max
-		assert !(interval = 0.0)
-		assert((max - min) / interval) % 1.0 = 0.0
-		do me.min :: min
-		do me.max :: max
-		do me.interval :: interval
-	end func
-end class
