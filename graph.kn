@@ -65,7 +65,7 @@
 		do me.scaleY :: scale
 	end func
 	
-	func drawAxis(scaleX: Scale, scaleY: Scale) {軸の描画, TODO:Scaleクラスで受け取る}
+	func drawAxis(scaleX: Scale, scaleY: Scale) {軸の描画}
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
 		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
 		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
@@ -73,7 +73,7 @@
 		do me.drawScale(scaleX, scaleY)
 	end func
 	
-	func drawScale(scaleX: Scale, scaleY: Scale) {目盛りの表示，TODO:Scaleクラスで受け取る}
+	func drawScale(scaleX: Scale, scaleY: Scale) {目盛りの表示}
 		{X軸の目盛り描画}
 		var nX: int :: ((scaleX.max - scaleX.min) / scaleX.interval) $ int
 		var drawBaseX: float :: me.posX + me.labelSize
@@ -172,4 +172,3 @@
 		do me.drawTitle()
 	end func
 end class
-
