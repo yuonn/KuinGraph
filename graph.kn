@@ -10,14 +10,15 @@
 	+var title: []char
 	+var labelX: []char
 	+var labelY: []char
-	+var labelSize: float
 	+var axisColor: int
-	+var scaleX: Scale
-	+var scaleY: Scale
+	var scaleX: Scale
+	var scaleY: Scale
+	+var scaleXDrawFlag: bool
+	+var scaleYDrawFlag: bool
 	
 	*func ctor()
-		do me.posX :: 50.0
-		do me.posY :: 50.0
+		do me.posX :: 0.0
+		do me.posY :: 0.0
 		do me.width :: 400.0
 		do me.height :: 300.0
 		do me.titleFont :: draw@makeFont(null, 14, false, false, true, 0.0)
@@ -27,8 +28,9 @@
 		do me.title :: ""
 		do me.labelX :: ""
 		do me.labelY :: ""
-		do me.labelSize :: 55.0
 		do me.axisColor :: draw@black
+		do me.scaleXDrawFlag :: true
+		do me.scaleYDrawFlag :: true
 	end func
 	
 	+func setPos(posX: float, posY: float, width: float, height: float)
@@ -66,35 +68,41 @@
 	end func
 	
 	func drawAxis(scaleX: Scale, scaleY: Scale) {軸の描画}
-		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
-		do draw@line(me.posX + me.labelSize, me.posY, me.posX + me.width, me.posY, me.axisColor)
-		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.labelSize, me.posY + me.height - me.labelSize, me.axisColor)
-		do draw@line(me.posX + me.width, me.posY + me.height - me.labelSize, me.posX + me.width, me.posY, me.axisColor)
+		do draw@line(me.posX, me.posY, me.posX, me.posY + me.height, me.axisColor)
+		do draw@line(me.posX, me.posY, me.posX + me.width, me.posY, me.axisColor)
+		do draw@line(me.posX + me.width, me.posY + me.height, me.posX, me.posY + me.height, me.axisColor)
+		do draw@line(me.posX + me.width, me.posY + me.height, me.posX + me.width, me.posY, me.axisColor)
 		do me.drawScale(scaleX, scaleY)
 	end func
 	
 	func drawScale(scaleX: Scale, scaleY: Scale) {目盛りの表示}
 		{X軸の目盛り描画}
-		var nX: int :: ((scaleX.max - scaleX.min) / scaleX.interval) $ int
-		var drawBaseX: float :: me.posX + me.labelSize
-		var drawMagnifyX: float :: (me.width - me.labelSize) / (scaleX.max - scaleX.min)
-		for i(0, nX)
-			var drawPointX: float :: scaleX.interval * i $ float * drawMagnifyX + drawBaseX
-			var drawPointY: float :: me.posY + me.height - me.labelSize
-			do draw@line(drawPointX, drawPointY, drawPointX, drawPointY - 10.0, me.axisColor)
-			do me.varFont.draw(drawPointX, drawPointY, (scaleX.min + scaleX.interval * i $ float).toStr(), me.axisColor)
-		end for
+		if(me.scaleXDrawFlag)
+			var nX: int :: ((scaleX.max - scaleX.min) / scaleX.interval) $ int
+			var drawBaseX: float :: me.posX
+			var drawMagnifyX: float :: me.width / (scaleX.max - scaleX.min)
+			for i(0, nX)
+				var drawPointX: float :: scaleX.interval * i $ float * drawMagnifyX + drawBaseX
+				var drawPointY: float :: me.posY + me.height
+				do draw@line(drawPointX, drawPointY, drawPointX, drawPointY - 10.0, me.axisColor)
+				do me.varFont.draw(drawPointX - 5.0, drawPointY, (scaleX.min + scaleX.interval * i $ float).toStr(), me.axisColor)
+			end for
+		end if
+		
 		{Y軸の目盛り描画}
-		var nY: int :: ((scaleY.max - scaleY.min) / scaleY.interval) $ int
-		var drawBaseY: float :: me.posY + me.height - me.labelSize
-		var drawMagnifyY: float :: (me.height - me.labelSize) / (scaleY.max - scaleY.min)
-		for i(0, nY)
-			var drawPointX: float :: me.posX + me.labelSize
-			var drawPointY: float :: drawBaseY - scaleY.interval * i $ float * drawMagnifyY
-			do draw@line(drawPointX, drawPointY, drawPointX + 10.0, drawPointY, me.axisColor)
-			var str: []char :: (scaleY.min + scaleY.interval * i $ float).toStr()
-			do me.varFont.draw(drawPointX - (^str * 10) $ float - 5.0, drawPointY - 10.0, str, me.axisColor) {TODO:他のFontサイズでもきれいに描画できるようにする}
-		end for
+		if(me.scaleYDrawFlag)
+			var nY: int :: ((scaleY.max - scaleY.min) / scaleY.interval) $ int
+			var drawBaseY: float :: me.posY + me.height
+			var drawMagnifyY: float :: me.height / (scaleY.max - scaleY.min)
+			for i(0, nY)
+				var drawPointX: float :: me.posX
+				var drawPointY: float :: drawBaseY - scaleY.interval * i $ float * drawMagnifyY
+				do draw@line(drawPointX, drawPointY, drawPointX + 10.0, drawPointY, me.axisColor)
+				var str: []char :: (scaleY.min + scaleY.interval * i $ float).toStr()
+				do me.varFont.draw(drawPointX - (^str * 10) $ float - 5.0, drawPointY - 10.0, str, me.axisColor) {TODO:他のFontサイズでもきれいに描画できるようにする}
+			end for
+		end if
+		
 	end func
 	
 	{目盛りの計算}
@@ -125,11 +133,11 @@
 	end func
 	
 	func drawLabel() {TODO:縦軸のラベルの表示}
-		do me.labelFont.draw(me.posX + me.labelSize + (me.width - me.labelSize) / 2.0 - (^me.labelX) $ float * 5.0, me.posY + me.height - 0.65 * me.labelSize, me.labelX, me.fontColor)
+		do me.labelFont.draw(me.posX + me.width / 2.0 - (^me.labelX) $ float * 5.0, me.posY + 1.07 * me.height, me.labelX, me.fontColor)
 	end func
 	
 	func drawTitle()
-		do me.titleFont.draw(me.posX + me.width / 2.0 - (^me.title) $ float * 8.0, me.posY + me.height, me.title, me.fontColor)
+		do me.titleFont.draw(me.posX + me.width / 2.0 - (^me.title) $ float * 8.0, me.posY + 1.2 * me.height, me.title, me.fontColor)
 	end func
 	
 	+func plot(x: []float, y: []float, color: int) {折れ線グラフ}
@@ -141,10 +149,10 @@
 			do me.scaleY :: me.autoScale(y.min(), y.max())
 		end if
 		do me.drawAxis(me.scaleX, me.scaleY)
-		var baseX: float :: me.posX + me.labelSize
-		var baseY: float :: me.posY + me.height - me.labelSize
-		var magnifyX: float :: (me.width - me.labelSize) / (me.scaleX.max - me.scaleX.min)
-		var magnifyY: float :: (me.height - me.labelSize) / (me.scaleY.max - me.scaleY.min)
+		var baseX: float :: me.posX
+		var baseY: float :: me.posY + me.height
+		var magnifyX: float :: me.width / (me.scaleX.max - me.scaleX.min)
+		var magnifyY: float :: me.height / (me.scaleY.max - me.scaleY.min)
 		for i(0, n - 2)
 			do draw@line((x[i] - me.scaleX.min) * magnifyX + baseX, (me.scaleY.min - y[i]) * magnifyY + baseY, (x[i + 1] - me.scaleX.min) * magnifyX + baseX, (me.scaleY.min - y[i + 1]) * magnifyY + baseY, color)
 		end for
@@ -161,10 +169,10 @@
 			do me.scaleY :: me.autoScale(y.min(), y.max())
 		end if
 		do me.drawAxis(me.scaleX, me.scaleY)
-		var baseX: float :: me.posX + me.labelSize
-		var baseY: float :: me.posY + me.height - me.labelSize
-		var magnifyX: float :: (me.width - me.labelSize) / (me.scaleX.max - me.scaleX.min)
-		var magnifyY: float :: (me.height - me.labelSize) / (me.scaleY.max - me.scaleY.min)
+		var baseX: float :: me.posX
+		var baseY: float :: me.posY + me.height
+		var magnifyX: float :: me.width / (me.scaleX.max - me.scaleX.min)
+		var magnifyY: float :: me.height / (me.scaleY.max - me.scaleY.min)
 		for i(0, n - 1)
 			do draw@circle((x[i] - me.scaleX.min) * magnifyX + baseX, (me.scaleY.min - y[i]) * magnifyY + baseY, size, size, color)
 		end for
